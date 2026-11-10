@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+data/*
+!data/.gitkeep
+*.db
+*.db.bak*
+__pycache__/
+*.pyc
+.DS_Store

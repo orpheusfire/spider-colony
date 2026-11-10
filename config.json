@@ -1,0 +1,9 @@
+{
+  "hotel": "Example Hotel, New Orleans",
+  "check_in": "2027-01-09",
+  "check_out": "2027-01-10",
+  "adults": 1,
+  "deal_drop_pct": 30,
+  "baseline_window_hours": 24,
+  "min_baseline_samples": 12
+}

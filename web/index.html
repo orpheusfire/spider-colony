@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spider Colony</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy-900:#07142e; --navy-800:#0a1f44; --navy-700:#10295a; --navy-600:#1a3a75;
+  --gold:#f5b800; --gold-soft:#ffd75e; --ink:#eaf0fb; --ink-dim:#9db0d3; --line:#26427d;
+  --ok:#5ee0a0; --bad:#ff7a7a;
+  --display:'Sora','Manrope',system-ui,-apple-system,'Segoe UI',sans-serif; --body:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--navy-900);color:var(--ink);font:17px/1.5 var(--body);min-height:100vh;display:flex;flex-direction:column}
+button,input,select{font:inherit;color:inherit}
+header{background:var(--navy-800);border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:5}
+.bar{max-width:1040px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+.logo svg{width:38px;height:38px}
+.logo b{font:700 24px var(--display);letter-spacing:-.01em}
+.logo b span{color:var(--gold)}
+.spacer{flex:1}
+.ghost{background:none;border:1px solid var(--line);font-size:16px;padding:9px 15px;cursor:pointer;border-radius:2px}
+.ghost:hover{border-color:var(--gold);color:var(--gold-soft)}
+main{max-width:1040px;width:100%;margin:0 auto;padding:20px 16px 60px;flex:1}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tab{flex:1;background:var(--navy-800);border:0;border-right:1px solid var(--line);padding:14px 8px;cursor:pointer;
+  font:600 17px var(--display);letter-spacing:.01em;color:var(--ink-dim);position:relative}
+.tab:last-child{border-right:0}
+.tab[aria-selected=true]{background:var(--navy-700);color:var(--ink)}
+.tab[aria-selected=true]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--gold)}
+.panel{background:var(--navy-700);padding:18px;border:1px solid var(--line);border-top:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+label{display:block;font:600 13px var(--body);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:5px}
+input,select{width:100%;background:var(--navy-900);border:1px solid var(--line);border-radius:2px;padding:12px 12px;font-size:17px}
+input::-webkit-calendar-picker-indicator{filter:invert(1);opacity:1;cursor:pointer;padding:4px}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:end}
+.gold{background:var(--gold);color:#1b1500;border:0;border-radius:2px;padding:13px 24px;font:700 16px var(--display);letter-spacing:.02em;cursor:pointer}
+.gold:hover{background:var(--gold-soft)}
+.note{color:var(--ink-dim);font-size:15px;margin:10px 0 0}
+h2{font:600 22px var(--display);letter-spacing:-.005em;margin:34px 0 4px;display:flex;align-items:center;gap:10px}
+h2::before{content:"";width:28px;height:3px;background:var(--gold)}
+.cards{display:grid;gap:12px;margin-top:12px}
+.card{background:var(--navy-800);border:1px solid var(--line);border-left:4px solid var(--navy-600);padding:14px 16px;display:grid;gap:10px}
+.card.deal{border-left-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.row{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.kind{font:600 13px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.title{font:600 19px var(--display);letter-spacing:-.005em}
+.dim{color:var(--ink-dim);font-size:15px}
+.price{font:700 30px var(--display);letter-spacing:-.01em}
+.price.hit{color:var(--gold)}
+.pill{font-size:14px;padding:2px 8px;border:1px solid var(--line);border-radius:2px;color:var(--ink-dim)}
+.pill.gold{background:var(--gold);color:#1b1500;border-color:var(--gold);font-weight:600;padding:2px 8px;font-family:var(--body);font-size:14px;letter-spacing:0}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btns button,.btns a{background:none;border:1px solid var(--line);padding:9px 14px;border-radius:2px;cursor:pointer;color:var(--ink);text-decoration:none;font-size:16px}
+.btns button:hover,.btns a:hover{border-color:var(--gold);color:var(--gold-soft)}
+.btns .book{background:var(--gold);color:#1b1500;border-color:var(--gold);font-weight:700}
+.trip{background:var(--navy-900);border:1px dashed var(--line);padding:10px 12px;display:grid;gap:6px}
+.tripline{font-size:16px;color:var(--ink)}
+.copytrip{justify-self:start;background:none;border:1px solid var(--gold);color:var(--gold-soft);padding:7px 14px;border-radius:2px;cursor:pointer;font-size:15px}
+.copytrip:hover{background:var(--gold);color:#1b1500}
+.scoutbar{margin:0 0 14px;padding:12px 14px;border:1px solid var(--line);background:var(--navy-800);font-size:15px;color:var(--ink-dim);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.scoutbar.expired{border:2px solid var(--gold);color:var(--ink);background:var(--navy-700)}
+.scoutbar b{color:var(--gold-soft)}
+.scoutbar button{margin-left:auto}
+.empty{color:var(--ink-dim);padding:20px;border:1px dashed var(--line);text-align:center;margin-top:12px}
+dialog{background:var(--navy-800);color:var(--ink);border:2px solid var(--gold);border-radius:2px;padding:0;max-width:440px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(3,8,20,.7)}
+.dlg{padding:20px;display:grid;gap:14px}
+.dlg h3{margin:0;font:700 22px var(--display);letter-spacing:-.005em}
+.sw{display:flex;align-items:center;gap:10px;text-transform:none;letter-spacing:0;font:500 17px var(--body);color:var(--ink);margin:0;cursor:pointer}
+.sw input{width:auto}
+.flexrow{margin-top:12px}
+.gold-t{color:var(--gold)}
+.cheaphead{margin:26px 0 4px;font:600 18px var(--display);color:var(--gold)}
+.tgt{margin-top:14px;max-width:520px}
+.tgtrow{display:flex;gap:8px;align-items:stretch}
+.tgtrow .dollar{display:flex;align-items:center;padding:0 12px;background:var(--navy-900);border:1px solid var(--line);color:var(--gold);font:700 18px var(--display)}
+.tgtrow input{flex:1;min-width:0}.tgtrow select{width:auto;flex:none}
+.preview{margin-top:8px;font-size:16px;color:var(--gold-soft);min-height:1.5em}
+footer{border-top:3px solid var(--gold);background:var(--navy-800);text-align:center;padding:26px 16px;margin-top:auto}
+footer p{margin:0;max-width:640px;margin-inline:auto;font-size:18px}
+footer b{font-family:var(--display);color:var(--gold);font-weight:600}
+@media (max-width:560px){.tab{font-size:15px}.logo b{font-size:20px}.price{font-size:26px}}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <a class="logo" href="/" aria-label="Spider Colony">
+    <svg viewBox="0 0 64 64" fill="none" stroke="#f5b800" stroke-width="3.2" stroke-linecap="square" aria-hidden="true">
+      <circle cx="32" cy="32" r="6" fill="#f5b800"/>
+      <path d="M26 30 L14 20 L6 22 M14 20 L10 10 M14 20 L8 26"/>
+      <path d="M38 30 L50 20 L58 22 M50 20 L54 10 M50 20 L56 26"/>
+      <path d="M26 36 L14 46 L6 44 M14 46 L10 56 M14 46 L8 40"/>
+      <path d="M38 36 L50 46 L58 44 M50 46 L54 56 M50 46 L56 40"/>
+    </svg>
+    <b>Spider <span>Colony</span></b>
+  </a>
+  <div class="spacer"></div>
+  <button class="ghost" id="openSettings">Alerts &amp; settings</button>
+</div></header>
+
+<main>
+  <div id="scoutBar" class="scoutbar" hidden></div>
+  <div class="tabs" role="tablist" aria-label="What are you hunting?">
+    <button class="tab" role="tab" data-cat="hotel" aria-selected="true">Hotels</button>
+    <button class="tab" role="tab" data-cat="flight" aria-selected="false">Flights</button>
+    <button class="tab" role="tab" data-cat="car" aria-selected="false">Cars</button>
+  </div>
+  <form class="panel" id="form" autocomplete="off"></form>
+
+  <div id="resultsWrap" hidden>
+    <h2>Search results</h2>
+    <div id="results" class="cards"></div>
+  </div>
+
+  <h2>Watching</h2>
+  <div id="watches" class="cards"></div>
+</main>
+<footer><p>★ Created by <b>Nick Monteleone</b> for family and friends to find good travel deals. ★</p></footer>
+
+<dialog id="settings"><form method="dialog" class="dlg" id="settingsForm">
+  <h3>Alerts &amp; settings</h3>
+  <div><label for="s_name">Name</label><input id="s_name"></div>
+  <div><label for="s_phone">Mobile number (for text alerts)</label><input id="s_phone" inputmode="tel" placeholder="+1 555 123 4567"></div>
+  <div><label for="s_email">Email</label><input id="s_email" type="email"></div>
+  <label class="sw"><input type="checkbox" id="s_sms"> Text me when a deal hits</label>
+  <label class="sw"><input type="checkbox" id="s_mail"> Email me when a deal hits</label>
+  <label class="sw"><input type="checkbox" id="s_united"> Include United Airlines Basic Economy + bag fee</label>
+  <label class="sw"><input type="checkbox" id="s_hide"> Hide cheap airlines (Frontier, Spirit, Allegiant)</label>
+  <label class="sw"><input type="checkbox" id="s_miles"> Cars: only count deals with confirmed unlimited mileage</label>
+  <p class="note" style="margin:0">Cheap airlines (Frontier, Spirit, Allegiant) are searched too but shown in their own section; their bag fees are often extra. Prices that count toward a deal always include taxes and fees.</p>
+  <div class="actions" style="margin:0"><button class="gold" value="save">Save</button><button class="ghost" value="cancel" formnovalidate>Close</button></div>
+</form></dialog>
+
+<script>
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = (n, cur='USD') => n == null ? '—' : new Intl.NumberFormat('en-US', {style:'currency', currency:cur, maximumFractionDigits:0}).format(n);
+const api = (p, body) => fetch(p, body === undefined ? {} : {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)}).then(r => r.json());
+let cat = 'hotel', state = {watches:[], profile:{}, max_steps:9}, pollTimer = null, lastParams = null;
+
+const FORMS = {
+  hotel: [
+    ['where','Hotel or destination','text','Hotel Monteleone, New Orleans'],
+    ['checkin','Check-in','date'], ['checkout','Check-out','date'],
+    ['adults','Adults','number','1'], ['room','Room type (optional)','text','']],
+  flight: [
+    ['from','From (city or airport)','text','MSP'], ['to','To (city or airport)','text','MSY'],
+    ['depart','Depart','date'], ['ret','Return (optional)','date'],
+    ['adults','Travelers','number','1']],
+  car: [
+    ['pickup','Pickup location','text','MSY airport'], ['dropoff','Drop-off (if different)','text',''],
+    ['from','Pickup date','date'], ['pickupTime','Pickup time','time','10:00'],
+    ['to','Drop-off date','date'], ['dropoffTime','Drop-off time','time','10:00']],
+};
+const KIND = {hotel:'Hotel', flight:'Flight', car:'Rental car'};
+
+function renderForm(){
+  const f = $('#form');
+  const todayISO = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  f.innerHTML = `<div class="grid">${FORMS[cat].map(([id,lab,type,ph]) =>
+    `<div><label for="f_${id}">${lab}</label><input id="f_${id}" name="${id}" type="${type}" ${type==='date' ? `min="${todayISO}"` : ''} ${ph?`value="${esc(ph)}"`:''} ${type==='number'?'min="0" step="any"':''}></div>`).join('')}</div>
+  ${cat==='car' ? '' : `<label class="sw flexrow"><input type="checkbox" name="flex" id="f_flex"> Flexible dates <span class="dim">(also check 3 days either side)</span></label>`}
+  <div class="tgt"><label for="f_target">${cat==='flight' ? 'Target price, all-in total' : 'Target price, all-in' + (cat==='hotel'?' (optional)':'')}</label>
+    <div class="tgtrow"><span class="dollar">$</span><input id="f_target" name="target" type="number" min="0" step="any" inputmode="decimal" placeholder="${cat==='flight'?'e.g. 200':'e.g. 25'}">
+    ${cat==='flight' ? '' : `<select id="f_unit" name="unit" aria-label="Price basis"><option value="day">${cat==='hotel'?'per night':'per day'}</option><option value="total">total</option></select>`}</div>
+    <div class="preview" id="tPreview" aria-live="polite"></div></div>
+  <div class="actions">
+    <button type="submit" class="gold" id="btnSearch">Search</button>
+    <button type="button" class="ghost" id="btnWatch">★ Watch it</button>
+  </div>
+  <p class="note">${cat==='car'?'Tip: type an airport code (like ATL) as the pickup so Book it now can open the company\'s site with your trip filled in. ':''}${cat==='hotel'?'No target? Spider Colony alerts when a site drops well below its own normal price.':'You set the price. The moment a scout finds it, all-in, you get the alert.'}</p>`;
+  f.onsubmit = e => { e.preventDefault(); startSearch(); };
+  $('#btnWatch').onclick = addWatch;
+  f.addEventListener('input', updatePreview); f.addEventListener('change', updatePreview); updatePreview();
+}
+function tripDays(c, p){
+  try {
+    if (c==='hotel' && p.checkin && p.checkout) return Math.max(Math.round((new Date(p.checkout) - new Date(p.checkin)) / 864e5), 1);
+    if (c==='car' && p.from && p.to) {
+      const a = new Date(`${p.from}T${p.pickupTime||'10:00'}:00Z`), b = new Date(`${p.to}T${p.dropoffTime||'10:00'}:00Z`);
+      const d = Math.ceil((b - a) / 864e5); return Number.isFinite(d) ? Math.max(d, 1) : null;
+    }
+  } catch (e) {}
+  return null;
+}
+function updatePreview(){
+  const el = $('#tPreview'); if (!el) return;
+  const p = readForm(), t = Number(p.target), d = tripDays(cat, p), unit = p.unit || 'total', word = cat==='hotel' ? 'night' : 'day';
+  if (cat==='flight' || !t) { el.textContent = ''; return; }
+  if (!d) { el.textContent = unit==='day' ? `Add your ${cat==='hotel'?'check-in and check-out':'pickup and drop-off'} dates to see the total.` : ''; return; }
+  const plural = d === 1 ? word : word + 's';
+  el.textContent = unit==='day' ? `= ${money(t*d)} total after taxes and fees, for ${d} ${plural}` : `= ${money(t/d)} per ${word}, over ${d} ${plural}`;
+}
+function readForm(){
+  const p = {};
+  new FormData($('#form')).forEach((v,k) => { if (v !== '') p[k] = v; });
+  if (p.flex) p.flex = true;
+  return p;
+}
+function labelFor(p){
+  if (cat==='hotel') return p.where || 'Hotel';
+  if (cat==='flight') return `${p.from||'?'} → ${p.to||'?'}`;
+  return `Car at ${p.pickup||'?'}`;
+}
+function datesFor(p){
+  const flex = p.flex ? ' · flexible dates (±3 days)' : '';
+  if (cat==='hotel') return [p.checkin, p.checkout].filter(Boolean).join(' → ') + flex;
+  if (cat==='flight') return [p.depart, p.ret].filter(Boolean).join(' → ') + flex;
+  return [p.from && `${p.from} ${p.pickupTime||''}`, p.to && `${p.to} ${p.dropoffTime||''}`].filter(Boolean).join(' → ');
+}
+
+async function startSearch(){
+  const p = readForm(); lastParams = p;
+  const made = await api('/api/search', {category:cat, params:p});
+  if (made.error) { alert(made.error); return; }
+  const {id} = made;
+  $('#resultsWrap').hidden = false;
+  const t0 = Date.now();
+  const waiting = () => { const s = Math.floor((Date.now() - t0) / 1000); return `<div class="empty"><b>Search queued.</b> The scouts sweep every 30 minutes, so results can take up to 30 minutes. This page updates by itself, so you can leave it open.<br>Waiting ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}</div>`; };
+  $('#results').innerHTML = waiting();
+  clearInterval(pollTimer);
+  let tries = 0, gotAny = false;
+  const tick = async () => {
+    const r = await api(`/api/search/${id}`);
+    if (r.results.length) gotAny = true; else if (!gotAny) $('#results').innerHTML = waiting();
+    renderResults(r);
+    if (r.status === 'done' || ++tries > 200) clearInterval(pollTimer);
+  };
+  pollTimer = setInterval(tick, 4000); tick();
+}
+const fmtDay = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric', timeZone:'UTC'});
+const fmtTime = t => { if (!t) return ''; const [h, m] = t.split(':').map(Number); return `${h % 12 || 12}:${String(m).padStart(2,'0')} ${h < 12 ? 'AM' : 'PM'}`; };
+function tripSummary(cat, p){
+  p = p || {};
+  if (cat === 'car') return `Pick-up: ${p.pickup || '?'}, ${p.from ? fmtDay(p.from) : '?'} at ${fmtTime(p.pickupTime) || '?'}. Drop-off: ${p.dropoff || p.pickup || '?'}, ${p.to ? fmtDay(p.to) : '?'} at ${fmtTime(p.dropoffTime) || '?'}.`;
+  if (cat === 'hotel') return `${p.where || 'Hotel'}: check-in ${p.checkin ? fmtDay(p.checkin) : '?'}, check-out ${p.checkout ? fmtDay(p.checkout) : '?'}, ${p.adults || 1} adult${(p.adults||1) == 1 ? '' : 's'}${p.room ? ', ' + p.room + ' room' : ''}${p.flex ? ' (dates flexible, about 3 days either side)' : ''}.`;
+  return `${p.from || '?'} to ${p.to || '?'}: depart ${p.depart ? fmtDay(p.depart) : '?'}${p.ret ? ', return ' + fmtDay(p.ret) : ''}, ${p.adults || 1} traveler${(p.adults||1) == 1 ? '' : 's'}${p.flex ? ' (dates flexible, about 3 days either side)' : ''}.`;
+}
+function copyTrip(btn, text){
+  const done = () => { btn.textContent = 'Copied ✓'; setTimeout(() => btn.textContent = 'Copy my trip', 2000); };
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, () => { btn.textContent = 'Select the text above'; });
+  else btn.textContent = 'Select the text above';
+}
+function renderResults(r){
+  if (!r.results.length) return;
+  // Rule: at or under your all-in target -> "Book it now" (no Watch button). Over target (or no target set) -> "Watch this".
+  const cardFor = (x,i) => {
+    const under = x.within_target === true;
+    const note = {prefilled: 'Opens their site with your trip filled in', page: 'Opens the booking page for this result', home: "Opens the company's home page: re-enter your trip there"}[x.link_kind] || '';
+    const book = x.url ? `<a class="book" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">Book it now →</a><span class="dim">${note}</span>` : `<span class="dim">Under your target, but this source gave no booking link</span>`;
+    const trip = (under && x.link_kind === 'home') ? `<div class="trip"><div class="dim">Their site can't be pre-filled, so enter this there:</div><div class="tripline">${esc(tripSummary(r.category, r.params))}</div><button class="copytrip" data-text="${esc(tripSummary(r.category, r.params))}">Copy my trip</button></div>` : '';
+    const buttons = x.price == null ? '' : under ? book : `${x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${x.link_kind === 'prefilled' ? 'View on their site' : 'View'}</a>` : ''}<button data-i="${i}" class="wbtn">★ Watch this</button>`;
+    return `<div class="card ${under ? 'deal' : ''}"><div class="row"><span class="title">${esc(x.title)}</span>${under ? '<span class="pill gold">UNDER YOUR TARGET</span>' : ''}<span class="dim">${esc(x.source)}</span><span class="spacer"></span><span class="price ${under ? 'hit' : ''}">${money(x.price)}</span></div>
+    <div class="btns">${buttons}</div>${trip}</div>`; };
+  const normal = r.results.map((x,i) => x.budget ? '' : cardFor(x,i)).join('');
+  const cheap = r.results.map((x,i) => x.budget ? cardFor(x,i) : '').join('');
+  $('#results').innerHTML = normal + (cheap ? `<div class="cheaphead">Cheap airlines</div><p class="note">Frontier, Spirit and Allegiant. Their fares often leave out carry-on and checked bags, so check the bag fees on their site before you decide.</p>` + cheap : '');
+  document.querySelectorAll('.copytrip').forEach(b => b.onclick = () => copyTrip(b, b.dataset.text));
+  document.querySelectorAll('.wbtn').forEach(b => b.onclick = () => addWatch(r.results[+b.dataset.i]));
+}
+
+async function addWatch(fromResult){
+  const p = readForm();
+  const target = p.target ? Number(p.target) : null, unit = cat === 'flight' ? 'total' : (p.unit || 'day'); delete p.target; delete p.unit;
+  if (cat !== 'hotel' && !target) { alert('Set a target price first — that is what Spider Colony watches for.'); $('#f_target').focus(); return; }
+  if (target && unit === 'day' && !tripDays(cat, p)) { alert(`Add your ${cat==='hotel'?'check-in and check-out':'pickup and drop-off'} dates so I can work out the total.`); return; }
+  const label = (fromResult && fromResult.title && fromResult.title !== undefined && !(fromResult instanceof Event)) ? fromResult.title : labelFor(p);
+  const btn = $('#btnWatch'); if (btn) { if (btn.disabled) return; btn.disabled = true; setTimeout(() => btn.disabled = false, 2500); }
+  const made = await api('/api/watch', {category:cat, label, params:p, target, target_unit:unit});
+  if (made.error) { alert(made.error); return; }
+  if (made.duplicate) { alert('You are already watching this exact trip at this price, so I did not add a copy.'); }
+  load();
+}
+
+async function loadScout(){
+  const s = await api('/api/scout'), bar = $('#scoutBar'); bar.hidden = false;
+  if (s.expired) {
+    bar.className = 'scoutbar expired';
+    bar.innerHTML = `<span><b>Your week is up.</b> The scout has stopped, so no new prices are being checked and no alerts will be sent. Do you want another week?</span><button class="gold" id="extendBtn">Continue for another week</button>`;
+    $('#extendBtn').onclick = async () => { await api('/api/scout/extend', {}); loadScout(); alert('Another week started. If the scout was switched off, tell Claude: "turn Spider Colony back on".'); };
+  } else {
+    bar.className = 'scoutbar';
+    const end = new Date(s.expires).toLocaleString([], {weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+    bar.innerHTML = `<span>The scout checks every <b>30 minutes</b> and stops by itself on <b>${esc(end)}</b>. Then it asks if you want another week.</span>`;
+  }
+}
+async function load(){
+  loadScout();
+  state = await api('/api/state');
+  renderWatches(); fillSettings();
+}
+function renderWatches(){
+  const el = $('#watches');
+  if (!state.watches.length){ el.innerHTML = '<div class="empty">Nothing watched yet. Fill in a trip above and hit ★ Watch it.</div>'; return; }
+  el.innerHTML = state.watches.map(w => {
+    const b = w.best, hit = b && w.effective_target != null && b.price <= w.effective_target;
+    const loose = w.loosen_steps ? `<span class="pill gold">+${w.loosen_steps*10}% looser</span>` : '';
+    const paused = w.status === 'paused' ? '<span class="pill">paused</span>' : '';
+    const dates = datesFor_w(w);
+    return `<div class="card ${hit?'deal':''}">
+      <div class="row"><span class="kind">★ ${KIND[w.category]}</span><span class="title">${esc(w.label)}</span>${paused}${hit ? '<span class="pill gold">DEAL</span>' : ''}<span class="spacer"></span>
+        <span class="dim">${w.last_checked ? 'checked ' + new Date(w.last_checked).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'not checked yet'}</span></div>
+      <div class="dim">${esc(dates)}</div>
+      <div class="row">
+        <div><div class="dim">Best all-in price (total)</div><div class="price ${hit?'hit':''}">${b ? money(b.price, b.currency) : (w.unconfirmed ? money(w.unconfirmed.price, w.unconfirmed.currency) : '—')}</div><div class="dim">${!b && w.unconfirmed ? 'not counted: unlimited mileage not confirmed · via ' + esc(w.unconfirmed.source) : ''}${b ? (b.per_day ? money(b.per_day, b.currency) + '/' + unitWord(w) + ' · ' : '') + 'via ' + esc(b.source) : 'waiting on scouts'}</div></div>
+        <div><div class="dim">${w.effective_target!=null ? 'Alert at or below' : 'Alert when well below normal'}</div>
+          <div class="price">${w.effective_target==null ? 'auto' : (w.target_unit==='day' && w.effective_per_day ? money(w.effective_per_day) + '/' + unitWord(w) : money(w.effective_target))}</div>
+          <div class="dim">${w.effective_target!=null && w.target_unit==='day' && w.days ? '= ' + money(w.effective_target) + ' total after taxes and fees, ' + w.days + ' ' + unitWord(w) + (w.days===1?'':'s') : (w.effective_target!=null && w.days ? '≈ ' + money(w.effective_per_day) + '/' + unitWord(w) : '')}</div>${loose}</div>
+      </div>
+      ${w.best_budget ? `<div class="dim" style="margin-top:8px"><b class="gold-t">Cheap airlines:</b> ${money(w.best_budget.price, w.best_budget.currency)} via ${esc(w.best_budget.source)}${w.effective_target!=null && w.best_budget.price <= w.effective_target ? ' <span class="pill gold">UNDER TARGET</span>' : ''}${w.best_budget.url ? ` · <a href="${esc(w.best_budget.url)}" target="_blank" rel="noopener noreferrer">View</a>` : ''} · bags may cost extra</div>` : ''}
+      <div class="btns">
+        ${b && b.url ? (hit ? `<a class="book" href="${esc(b.url)}" target="_blank" rel="noopener noreferrer">Book it now →</a>` : `<a href="${esc(b.url)}" target="_blank" rel="noopener noreferrer">View best price</a>`) : ''}
+        ${w.target!=null ? `<button data-a="loosen" data-id="${w.id}" ${w.loosen_steps>=state.max_steps?'disabled':''}>Loosen 10%</button>${w.loosen_steps?`<button data-a="tighten" data-id="${w.id}">Tighten</button>`:''}` : ''}
+        <button data-a="${w.status==='paused'?'resume':'pause'}" data-id="${w.id}">${w.status==='paused'?'Resume':'Pause'}</button>
+        <button data-a="delete" data-id="${w.id}">Remove</button>
+      </div></div>`;
+  }).join('');
+  el.querySelectorAll('button[data-a]').forEach(b => b.onclick = async () => {
+    if (b.dataset.a === 'delete' && !confirm('Stop watching this?')) return;
+    await api(`/api/watch/${b.dataset.id}/${b.dataset.a}`, {}); load();
+  });
+}
+function unitWord(w){ return w.category==='hotel' ? 'night' : 'day'; }
+function datesFor_w(w){ const c = cat; cat = w.category; const s = datesFor(w.params); cat = c; return s; }
+
+function fillSettings(){
+  const p = state.profile;
+  $('#s_name').value = p.name || ''; $('#s_phone').value = p.phone || ''; $('#s_email').value = p.email || '';
+  $('#s_sms').checked = p.sms_on === '1'; $('#s_mail').checked = p.email_on === '1'; $('#s_united').checked = p.include_united_be === '1'; $('#s_miles').checked = p.require_unlimited_mileage === '1'; $('#s_hide').checked = p.hide_budget === '1';
+}
+$('#openSettings').onclick = () => $('#settings').showModal();
+$('#settingsForm').addEventListener('submit', async e => {
+  if (e.submitter && e.submitter.value === 'save'){
+    await api('/api/profile', {name:$('#s_name').value, phone:$('#s_phone').value, email:$('#s_email').value,
+      sms_on:$('#s_sms').checked?'1':'0', email_on:$('#s_mail').checked?'1':'0', include_united_be:$('#s_united').checked?'1':'0', require_unlimited_mileage:$('#s_miles').checked?'1':'0', hide_budget:$('#s_hide').checked?'1':'0'});
+    load();
+  }
+});
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t));
+  cat = t.dataset.cat; renderForm();
+  $('#resultsWrap').hidden = true; clearInterval(pollTimer);
+});
+renderForm(); load(); setInterval(load, 30000);
+</script>
+</body>
+</html>
